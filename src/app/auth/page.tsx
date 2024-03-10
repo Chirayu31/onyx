@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function TabsDemo() {
   return (
-    <main className='flex items-center h-screen justify-center'>
+    <main className='flex mt-20 h-fit justify-center'>
       <Tabs defaultValue='signup' className='w-[400px]'>
         <TabsList className='grid w-full grid-cols-2'>
           <TabsTrigger value='signup'>Signup</TabsTrigger>

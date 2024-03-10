@@ -1,3 +1,4 @@
+'use client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -9,8 +10,33 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ChangeEvent, FormEvent, useState } from 'react'
+interface FormData {
+  email: string
+  password: string
+}
 
 const Signin = () => {
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
+  })
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }))
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    console.log('Form submitted:', formData)
+    // Perform form submission logic here
+    // You can access form data via formData object
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -23,6 +49,9 @@ const Signin = () => {
           <Input
             id='email'
             type='email'
+            name='email'
+            value={formData.email}
+            onChange={handleInputChange}
             placeholder='Enter College e-mail address'
           />
         </div>
@@ -31,12 +60,17 @@ const Signin = () => {
           <Input
             id='password'
             type='password'
+            name='password'
+            value={formData.password}
+            onChange={handleInputChange}
             placeholder='Enter Secure Password'
           />
         </div>
       </CardContent>
       <CardFooter>
-        <Button>Sign in</Button>
+        <Button className='w-full' onClick={handleSubmit}>
+          Sign in
+        </Button>
       </CardFooter>
     </Card>
   )
