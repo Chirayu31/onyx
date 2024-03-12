@@ -13,7 +13,7 @@ const Post = () => {
   const truncatedContent =
     postContent.length > 200 ? postContent.substr(0, 200) + '...' : postContent
   return (
-    <Card className='w-[600px] h-fit'>
+    <Card className='w-[700px] h-fit'>
       <CardHeader>
         <div className='flex items-center gap-2'>
           <img
