@@ -4,9 +4,9 @@ import PopularPostsItem from './PopularPostsItem'
 
 const PopularPosts = () => {
   return (
-    <Card className='w-[450px] h-fit'>
+    <Card className=' md:w-[300px] lg:w-[450px] h-fit'>
       <CardHeader>
-        <h3 className='text-lg font-bold'>Popular Posts</h3>
+        <h3 className='text-base md:text-lg font-bold'>Popular Posts</h3>
       </CardHeader>
       <CardContent>
         <PopularPostsItem />

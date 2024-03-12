@@ -13,7 +13,7 @@ const Post = () => {
   const truncatedContent =
     postContent.length > 200 ? postContent.substr(0, 200) + '...' : postContent
   return (
-    <Card className='w-[700px] h-fit'>
+    <Card className='w-full max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] h-fit cursor-pointer'>
       <CardHeader>
         <div className='flex items-center gap-2'>
           <img
@@ -26,17 +26,10 @@ const Post = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <h2 className='font-bold text-lg'>
+        <h2 className='font-bold text-base lg:text-lg'>
           My conservative friends are more tolerant than my liberal friends
         </h2>
-        <p>
-          {truncatedContent}
-          {postContent.length > 200 && (
-            <Button className='text-blue-500' variant={'link'}>
-              Read More
-            </Button>
-          )}
-        </p>
+        <p className='text-sx sm:text-sm md:text-base'>{truncatedContent}</p>
       </CardContent>
       <CardFooter>
         <div className='flex gap-2'>
