@@ -79,24 +79,24 @@ const topicsData: { topic: string; items: string[] }[] = [
 const Topics = () => {
   return (
     <main className='flex mt-20 mb-20 justify-center min-h-fit w-full'>
-      <Card className='w-full max-w-[1100px] mx-20 shadow-lg'>
+      <Card className='w-full max-w-[1100px] mx-5 sm:mx-20 shadow-lg'>
         <CardHeader>
           <h1 className="font-bold text-4xl ml-2 font-['Montserrat_Alternates']">
             Boards
           </h1>
         </CardHeader>
         <CardContent>
-          <div className='grid grid-cols-3 w-full gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center w-full gap-4'>
             {topicsData.map((topic) => (
               <div key={topic.topic} className='flex flex-col z-10'>
-                <h4 className="text-xl text-gray-700 hover:text-black font-bold font-['Montserrat_Alternates']">
+                <h4 className="text-base sm:text-xl text-gray-700 hover:text-black font-bold font-['Montserrat_Alternates']">
                   {topic.topic}
                 </h4>
                 <div className='pl-2 flex flex-col gap-1'>
                   {topic.items.map((item) => (
                     <p
                       key={item}
-                      className='text-gray-800 cursor-pointer hover:text-black hover:underline'>
+                      className='text-gray-800 text-sm sm:text-base cursor-pointer hover:text-black hover:underline'>
                       {item}
                     </p>
                   ))}
