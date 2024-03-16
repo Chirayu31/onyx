@@ -1,5 +1,5 @@
 import PopularPosts from '@/components/feed/PopularPosts'
-import Post from '@/components/feed/Post'
+import Post from '@/components/post/Post'
 import React from 'react'
 
 const Feed = () => {
