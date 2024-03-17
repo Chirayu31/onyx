@@ -20,8 +20,11 @@
     "@trpc/next": "^11.0.0-next-beta.318",
     "@trpc/react-query": "^11.0.0-next-beta.318",
     "@trpc/server": "^11.0.0-next-beta.318",
+    "argon2": "^0.40.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cookie": "^0.6.0",
+    "jsonwebtoken": "^9.0.2",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18",
@@ -31,6 +34,8 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/cookie": "^0.6.0",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
