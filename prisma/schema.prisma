@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id       String @id @default(cuid())
+  username String
+  email    String
+  password String
+  course   String
+  year     Int
+  ppic     String
+
+  Posts        Post[]
+  PostLikes    PostLikes[]
+  CommentLikes CommentLikes[]
+  Comment      Comment[]
+  Views        Views[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index(fields: [email])
+}
+
+model Topics {
+  id        String      @id @default(cuid())
+  title     String
+  subtopics Subtopics[]
+}
+
+model Subtopics {
+  id       String @id @default(cuid())
+  title    String
+  topicsId String
+
+  posts Post[]
+
+  Topics Topics @relation(fields: [topicsId], references: [id])
+}
+
+model Post {
+  id      String @id @default(uuid())
+  title   String
+  body    String
+  userId  String
+  topicId String
+
+  Likes   PostLikes[]
+  Comment Comment[]
+  Views   Views[]
+
+  user  User      @relation(fields: [userId], references: [id])
+  topic Subtopics @relation(fields: [topicId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([topicId, userId])
+}
+
+model PostLikes {
+  id     String @id @default(uuid())
+  postId String
+  userId String
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId, userId])
+}
+
+model CommentLikes {
+  id        String @id @default(uuid())
+  commentId String
+  userId    String
+
+  comment Comment @relation(fields: [commentId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, commentId])
+}
+
+model Comment {
+  id      String  @id @default(uuid())
+  body    String
+  isReply Boolean
+  postId  String
+  userId  String
+
+  likes CommentLikes[]
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId, userId])
+}
+
+model Views {
+  id     String @id @default(uuid())
+  postId String
+  userId String
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+}
