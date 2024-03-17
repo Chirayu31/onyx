@@ -1,4 +1,4 @@
-import { procedure, router } from '../trpc'
+import { procedure, protectedProcedure, router } from '../trpc'
 import * as argon2 from 'argon2'
 import { sign } from 'jsonwebtoken'
 import { TRPCError } from '@trpc/server'
@@ -36,7 +36,7 @@ export const authRouter = router({
     })
 
     const token = sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' })
-
+    user.password = ''
     cookies().set({
       name: 'auth',
       value: token,
@@ -53,6 +53,7 @@ export const authRouter = router({
 
     const user = await ctx.prisma.user.findUnique({
       where: { email: email },
+      select: { username: true, password: true, id: true },
     })
 
     if (!user) {
@@ -77,5 +78,29 @@ export const authRouter = router({
     })
 
     return { user }
+  }),
+  profile: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user.userId
+
+    const user: {
+      username: string
+      ppic: string
+      course: string
+      year: number
+    } | null = await ctx.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        username: true,
+        ppic: true,
+        course: true,
+        year: true,
+      },
+    })
+
+    if (!user) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'User ID Not Found' })
+    }
+
+    return user
   }),
 })
