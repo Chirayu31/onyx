@@ -13,3 +13,9 @@ export const getPostById = z.object({
 export const deletePostById = z.object({
   id: z.string(),
 })
+
+export const getPostsByTopicId = z.object({
+  topicId: z.string(),
+  page: z.number(),
+  pageSize: z.number(),
+})

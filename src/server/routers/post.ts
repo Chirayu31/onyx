@@ -1,4 +1,9 @@
-import { addPost, deletePostById, getPostById } from '@/lib/validation/post'
+import {
+  addPost,
+  deletePostById,
+  getPostById,
+  getPostsByTopicId,
+} from '@/lib/validation/post'
 import { protectedProcedure, router } from '../trpc'
 
 export const postRouter = router({
@@ -39,5 +44,37 @@ export const postRouter = router({
       })
 
       return { id }
+    }),
+
+  getPostsByTopicId: protectedProcedure
+    .input(getPostsByTopicId)
+    .query(async ({ ctx, input }) => {
+      const { topicId, page = 1, pageSize = 25 } = input
+      const offset = (page - 1) * pageSize
+
+      const posts = await ctx.prisma.post.findMany({
+        where: { topicId },
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          userId: true,
+          createdAt: true,
+          user: {
+            select: {
+              username: true,
+              ppic: true,
+            },
+          },
+          _count: {
+            select: { Likes: true, Comment: true, Views: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: offset,
+        take: pageSize,
+      })
+
+      return posts
     }),
 })
