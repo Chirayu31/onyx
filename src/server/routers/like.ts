@@ -1,4 +1,4 @@
-import { postLikeInput } from '@/lib/validation/like'
+import { checkLikeInput, postLikeInput } from '@/lib/validation/like'
 import { protectedProcedure, router } from '../trpc'
 
 export const likeRouter = router({
@@ -6,10 +6,14 @@ export const likeRouter = router({
     .input(postLikeInput)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.userId
-      const { postId, isLiked } = input
+      const { postId } = input
 
-      if (isLiked) {
-        await ctx.prisma.postLikes.delete({ where: { id: postId } })
+      const existingLike = await ctx.prisma.postLikes.findFirst({
+        where: { postId, userId },
+      })
+
+      if (existingLike) {
+        await ctx.prisma.postLikes.delete({ where: { id: existingLike.id } })
         return { liked: false }
       } else {
         await ctx.prisma.postLikes.create({
@@ -19,7 +23,7 @@ export const likeRouter = router({
       }
     }),
   isLiked: protectedProcedure
-    .input(postLikeInput)
+    .input(checkLikeInput)
     .query(async ({ ctx, input }) => {
       const userId = ctx.user.userId
       const { postId } = input
@@ -28,7 +32,7 @@ export const likeRouter = router({
         where: { postId, userId },
       })
       if (existingLike) {
-        return { liked: true, id: existingLike.id }
+        return { liked: true }
       }
       return { liked: false }
     }),
