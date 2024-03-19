@@ -30,7 +30,22 @@ export const postRouter = router({
       const { id } = input
       const post = await ctx.prisma.post.findUnique({
         where: { id },
-        include: { Likes: true, Comment: true, Views: true },
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          userId: true,
+          createdAt: true,
+          user: {
+            select: {
+              username: true,
+              ppic: true,
+            },
+          },
+          _count: {
+            select: { Likes: true, Comment: true, Views: true },
+          },
+        },
       })
 
       return post
