@@ -4,19 +4,46 @@ import Comment from '@/components/post/Comment'
 import Post from '@/components/post/Post'
 import { Textarea } from '@/components/ui/textarea'
 import { trpc } from '@/utils/trpc'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 const PostPage = ({ params }: { params: { postId: string } }) => {
+  const [commentInput, setCommentInput] = useState('')
+  const [allComments, setAllComments] = useState<any[]>([])
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
   const { data: post, isLoading } = trpc.post.getPostById.useQuery({
     id: params.postId,
   })
+  const { mutate: addComment } = trpc.comment.addComment.useMutation()
+  const { data: comments } = trpc.comment.getCommentsForPost.useQuery({
+    postId: params.postId,
+  })
+
+  const handleSubmitComment = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    if (commentInput.trim()) {
+      addComment(
+        { postId: params.postId, body: commentInput, isReply: false },
+        {
+          onSuccess: (newComment) => {
+            setAllComments((prevComments) => [newComment, ...prevComments])
+            setCommentInput('')
+          },
+        }
+      )
+    }
+    setIsSubmitting(false)
+  }
+
+  useEffect(() => {
+    if (comments) {
+      setAllComments(comments)
+    }
+  }, [comments])
 
   if (isLoading) {
     return <div>Loading...</div>
-  }
-
-  if (post) {
-    console.log(post)
   }
 
   return (
@@ -41,10 +68,31 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
             />
           )}
 
-          <form className='flex w-full max-w-auto my-2 gap-2  items-center'>
-            <Textarea className='h-20 bg-white' placeholder='Add a comment' />
+          <form
+            className='flex w-full max-w-auto my-2 gap-2 items-center'
+            onSubmit={handleSubmitComment}>
+            <Textarea
+              className='h-20 bg-white'
+              placeholder='Add a comment'
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <button type='submit'>submit</button>
           </form>
-          <Comment />
+
+          {allComments?.map((comment) => (
+            <Comment
+              key={comment.id}
+              id={comment.id}
+              body={comment.body}
+              userId={comment.userId}
+              userImage={comment.user?.ppic ?? ''}
+              username={comment.user?.username ?? ''}
+              createdAt={comment.createdAt.toLocaleString()}
+              likesCount={comment.likes.length}
+            />
+          ))}
         </div>
       </main>
     </>
