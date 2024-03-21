@@ -6,9 +6,25 @@ import { Textarea } from '@/components/ui/textarea'
 import { trpc } from '@/utils/trpc'
 import React, { useEffect, useState } from 'react'
 
+export interface CommentData {
+  id: string
+  body: string
+  userId: string
+  user: {
+    id: string
+    ppic: string
+    username: string
+  }
+  createdAt: string
+  updatedAt: string
+  parentCommentId: string | null
+  isReply: boolean
+  isOwner: boolean
+}
+
 const PostPage = ({ params }: { params: { postId: string } }) => {
   const [commentInput, setCommentInput] = useState('')
-  const [allComments, setAllComments] = useState<any[]>([])
+  const [allComments, setAllComments] = useState<CommentData[]>([])
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const { data: post, isLoading } = trpc.post.getPostById.useQuery({
@@ -19,6 +35,12 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
     postId: params.postId,
   })
 
+  useEffect(() => {
+    if (comments) {
+      setAllComments(comments)
+    }
+  }, [comments])
+
   const handleSubmitComment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -26,7 +48,7 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
       addComment(
         { postId: params.postId, body: commentInput, isReply: false },
         {
-          onSuccess: (newComment) => {
+          onSuccess: (newComment: CommentData) => {
             setAllComments((prevComments) => [newComment, ...prevComments])
             setCommentInput('')
           },
@@ -36,14 +58,36 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
     setIsSubmitting(false)
   }
 
-  useEffect(() => {
-    if (comments) {
-      setAllComments(comments)
-    }
-  }, [comments])
+  const onDeleteComment = (commentId: string) => {
+    setAllComments((prevComments) =>
+      prevComments.filter((comment) => comment.id !== commentId)
+    )
+  }
+
+  const groupCommentsByParentId = (commentsArray: CommentData[]) => {
+    const commentsMap = new Map<string, CommentData[]>()
+    commentsArray.forEach((comment) => {
+      const parentId = comment.parentCommentId
+      if (!parentId) {
+        commentsMap.set(comment.id, [comment])
+      } else {
+        if (commentsMap.has(parentId)) {
+          commentsMap.get(parentId)!.push(comment)
+        } else {
+          commentsMap.set(parentId, [comment])
+        }
+      }
+    })
+    return commentsMap
+  }
 
   if (isLoading) {
     return <div>Loading...</div>
+  }
+
+  if (allComments) {
+    console.log(allComments)
+    console.log(groupCommentsByParentId(allComments))
   }
 
   return (
@@ -81,18 +125,28 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
             <button type='submit'>submit</button>
           </form>
 
-          {allComments?.map((comment) => (
-            <Comment
-              key={comment.id}
-              id={comment.id}
-              body={comment.body}
-              userId={comment.userId}
-              userImage={comment.user?.ppic ?? ''}
-              username={comment.user?.username ?? ''}
-              createdAt={comment.createdAt.toLocaleString()}
-              likesCount={comment.likes.length}
-            />
-          ))}
+          {allComments &&
+            Array.from(groupCommentsByParentId(allComments).values()).map(
+              (commentsGroup, index) => (
+                <div className='w-full' key={index}>
+                  {commentsGroup.map((comment) => (
+                    <Comment
+                      key={comment.id}
+                      id={comment.id}
+                      body={comment.body}
+                      userId={comment.userId}
+                      userImage={comment.user?.ppic ?? ''}
+                      username={comment.user?.username ?? ''}
+                      createdAt={comment.createdAt.toLocaleString()}
+                      onDeleteComment={onDeleteComment}
+                      isOwner={comment.isOwner}
+                      postId={params.postId}
+                      setAllComments={setAllComments}
+                    />
+                  ))}
+                </div>
+              )
+            )}
         </div>
       </main>
     </>

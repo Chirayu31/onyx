@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import LikesButton from './LikesButton'
 import { Card, CardContent, CardHeader } from '../ui/card'
 import {
   Dialog,
@@ -10,6 +9,8 @@ import {
   DialogTrigger,
 } from '../ui/dialog'
 import Content from './Content'
+import { trpc } from '@/utils/trpc'
+import { CommentData } from '@/app/feed/[topic]/[postId]/page'
 
 interface CommentProps {
   id: string
@@ -18,7 +19,10 @@ interface CommentProps {
   userImage: string
   username: string
   createdAt: string
-  likesCount: number
+  postId: string
+  isOwner: boolean
+  onDeleteComment: (commentId: string) => void
+  setAllComments: React.Dispatch<React.SetStateAction<CommentData[]>>
 }
 
 const Comment: React.FC<CommentProps> = ({
@@ -28,8 +32,40 @@ const Comment: React.FC<CommentProps> = ({
   userImage,
   username,
   createdAt,
-  likesCount,
+  postId,
+  isOwner,
+  onDeleteComment,
+  setAllComments,
 }) => {
+  const [replyInput, setReplyInput] = useState('')
+  const { mutate: replyComment } = trpc.comment.replyComment.useMutation()
+  const { mutate: deleteComment } = trpc.comment.deleteComment.useMutation()
+
+  const handleReplyComment = () => {
+    if (replyInput.trim()) {
+      replyComment(
+        { postId, body: replyInput, parentCommentId: id },
+        {
+          onSuccess: (newComment) => {
+            setAllComments((prevComments) => [newComment, ...prevComments])
+            setReplyInput('')
+          },
+        }
+      )
+    }
+  }
+
+  const handleDeleteComment = () => {
+    deleteComment(
+      { commentId: id },
+      {
+        onSuccess: () => {
+          onDeleteComment(id)
+        },
+      }
+    )
+  }
+
   return (
     <div className='flex flex-col w-full'>
       <div className='flex flex-col'>
@@ -51,7 +87,6 @@ const Comment: React.FC<CommentProps> = ({
         </div>
 
         <div className=' flex gap-2 ml-10  py-2  max-w-auto '>
-          <LikesButton count={likesCount} userId={userId} postId={id} />
           <Dialog>
             <DialogTrigger>Reply</DialogTrigger>
             <DialogContent>
@@ -60,12 +95,27 @@ const Comment: React.FC<CommentProps> = ({
                   Add your comment
                 </h2>
                 <div className='flex w-full py-2 max-w-auto items-center space-x-2'>
-                  <Input type='email' placeholder='Add a comment' />
-                  <Button type='submit'>Submit</Button>
+                  <Input
+                    type='text'
+                    placeholder='Add a reply'
+                    value={replyInput}
+                    onChange={(e) => setReplyInput(e.target.value)}
+                  />
+                  <Button type='submit' onClick={handleReplyComment}>
+                    Submit
+                  </Button>
                 </div>
               </DialogHeader>
             </DialogContent>
           </Dialog>
+          {isOwner && (
+            <Button
+              variant='link'
+              className='text-red-500'
+              onClick={handleDeleteComment}>
+              Delete
+            </Button>
+          )}
         </div>
       </div>
     </div>

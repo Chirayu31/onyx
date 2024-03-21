@@ -23,15 +23,20 @@ export const commentRouter = router({
         include: {
           user: {
             select: {
+              id: true,
               username: true,
               ppic: true,
             },
           },
-          likes: true,
         },
       })
 
-      return comment
+      const commentWithOwnership = {
+        ...comment,
+        isOwner: comment.user.id === userId,
+      }
+
+      return commentWithOwnership
     }),
 
   replyComment: protectedProcedure
@@ -48,9 +53,22 @@ export const commentRouter = router({
           userId,
           parentCommentId,
         },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              ppic: true,
+            },
+          },
+        },
       })
+      const commentWithOwnership = {
+        ...comment,
+        isOwner: comment.user.id === userId,
+      }
 
-      return comment
+      return commentWithOwnership
     }),
 
   deleteComment: protectedProcedure
@@ -86,6 +104,7 @@ export const commentRouter = router({
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       const { postId } = input
+      const userId = ctx.user.userId
 
       const comments = await ctx.prisma.comment.findMany({
         where: {
@@ -94,17 +113,21 @@ export const commentRouter = router({
         include: {
           user: {
             select: {
+              id: true,
               username: true,
               ppic: true,
             },
           },
-          likes: true,
         },
         orderBy: {
           createdAt: 'desc',
         },
       })
+      const commentsWithOwnership = comments.map((comment) => ({
+        ...comment,
+        isOwner: comment.user.id === userId,
+      }))
 
-      return comments
+      return commentsWithOwnership
     }),
 })
