@@ -91,6 +91,12 @@ export const commentRouter = router({
         throw new Error('Not authorized to delete this comment')
       }
 
+      await ctx.prisma.comment.deleteMany({
+        where: {
+          parentCommentId: commentId,
+        },
+      })
+
       await ctx.prisma.comment.delete({
         where: {
           id: commentId,
@@ -109,6 +115,7 @@ export const commentRouter = router({
       const comments = await ctx.prisma.comment.findMany({
         where: {
           postId,
+          isReply: false,
         },
         include: {
           user: {
@@ -129,5 +136,35 @@ export const commentRouter = router({
       }))
 
       return commentsWithOwnership
+    }),
+
+  getAllReplies: protectedProcedure
+    .input(z.object({ parentCommentId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { parentCommentId } = input
+      const userId = ctx.user.userId
+      const replies = await ctx.prisma.comment.findMany({
+        where: {
+          parentCommentId,
+          isReply: true,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              ppic: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+      const repliesWithOwnership = replies.map((reply) => ({
+        ...reply,
+        isOwner: reply.user.id === userId,
+      }))
+      return repliesWithOwnership
     }),
 })

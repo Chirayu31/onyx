@@ -2,6 +2,7 @@
 import Nav from '@/components/nav/Nav'
 import Comment from '@/components/post/Comment'
 import Post from '@/components/post/Post'
+import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { trpc } from '@/utils/trpc'
 import React, { useEffect, useState } from 'react'
@@ -64,30 +65,12 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
     )
   }
 
-  const groupCommentsByParentId = (commentsArray: CommentData[]) => {
-    const commentsMap = new Map<string, CommentData[]>()
-    commentsArray.forEach((comment) => {
-      const parentId = comment.parentCommentId
-      if (!parentId) {
-        commentsMap.set(comment.id, [comment])
-      } else {
-        if (commentsMap.has(parentId)) {
-          commentsMap.get(parentId)!.push(comment)
-        } else {
-          commentsMap.set(parentId, [comment])
-        }
-      }
-    })
-    return commentsMap
-  }
-
   if (isLoading) {
     return <div>Loading...</div>
   }
 
   if (allComments) {
     console.log(allComments)
-    console.log(groupCommentsByParentId(allComments))
   }
 
   return (
@@ -113,7 +96,7 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
           )}
 
           <form
-            className='flex w-full max-w-auto my-2 gap-2 items-center'
+            className='flex flex-col w-full max-w-auto my-2 gap-2 items-end'
             onSubmit={handleSubmitComment}>
             <Textarea
               className='h-20 bg-white'
@@ -122,31 +105,25 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
               onChange={(e) => setCommentInput(e.target.value)}
               disabled={isSubmitting}
             />
-            <button type='submit'>submit</button>
+            <Button className='w-[200px]'>Submit</Button>
           </form>
 
           {allComments &&
-            Array.from(groupCommentsByParentId(allComments).values()).map(
-              (commentsGroup, index) => (
-                <div className='w-full' key={index}>
-                  {commentsGroup.map((comment) => (
-                    <Comment
-                      key={comment.id}
-                      id={comment.id}
-                      body={comment.body}
-                      userId={comment.userId}
-                      userImage={comment.user?.ppic ?? ''}
-                      username={comment.user?.username ?? ''}
-                      createdAt={comment.createdAt.toLocaleString()}
-                      onDeleteComment={onDeleteComment}
-                      isOwner={comment.isOwner}
-                      postId={params.postId}
-                      setAllComments={setAllComments}
-                    />
-                  ))}
-                </div>
-              )
-            )}
+            allComments.map((comment) => (
+              <Comment
+                key={comment.id}
+                id={comment.id}
+                body={comment.body}
+                userId={comment.userId}
+                userImage={comment.user?.ppic ?? ''}
+                username={comment.user?.username ?? ''}
+                createdAt={comment.createdAt.toLocaleString()}
+                onDeleteComment={onDeleteComment}
+                isOwner={comment.isOwner}
+                postId={params.postId}
+                isReply={false}
+              />
+            ))}
         </div>
       </main>
     </>
