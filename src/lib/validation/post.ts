@@ -19,3 +19,8 @@ export const getPostsByTopicId = z.object({
   page: z.number(),
   pageSize: z.number(),
 })
+
+export const getPostsByUserId = z.object({
+  page: z.number(),
+  pageSize: z.number(),
+})
