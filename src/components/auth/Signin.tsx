@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { loginValidation } from '@/lib/validation/auth'
+import { trpc } from '@/utils/trpc'
 import { ChangeEvent, FormEvent, useState } from 'react'
 interface FormData {
   email: string
@@ -17,6 +19,7 @@ interface FormData {
 }
 
 const Signin = () => {
+  const login = trpc.auth.login.useMutation()
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -32,9 +35,18 @@ const Signin = () => {
 
   const handleSubmit = (e: FormEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    // Perform form submission logic here
-    // You can access form data via formData object
+    try {
+      const validatedData = loginValidation.safeParse(formData)
+      if (!validatedData.success) {
+        console.log('Invalid data')
+        return
+      }
+
+      const data = validatedData.data
+      login.mutate(data)
+    } catch (error) {
+      console.error('Error during signup:', error)
+    }
   }
 
   return (
@@ -68,7 +80,10 @@ const Signin = () => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className='w-full' onClick={handleSubmit}>
+        <Button
+          className='w-full'
+          onClick={handleSubmit}
+          disabled={login.isPending}>
           Sign in
         </Button>
       </CardFooter>

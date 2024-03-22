@@ -3,15 +3,8 @@ import { Button } from '@/components/ui/button'
 import { SiGoogle } from 'react-icons/si'
 import { Features } from '@/components/home/features'
 import HomeNav from '@/components/nav/HomeNav'
-import { trpc } from '@/utils/trpc'
 
 export default function Home() {
-  const hello = trpc.hello.useQuery({ text: 'Chirayu' })
-
-  if (hello.data) {
-    console.log(hello.data.greeting)
-  }
-
   return (
     <>
       <HomeNav />

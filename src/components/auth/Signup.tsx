@@ -11,14 +11,17 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { trpc } from '@/utils/trpc'
+import { signupValidation } from '@/lib/validation/auth'
 
 const Signup = () => {
+  const signup = trpc.auth.signup.useMutation()
   const [formData, setFormData] = useState({
-    username: '',
+    username: 'user@1010',
     email: '',
     password: '',
     course: '',
-    year: '',
+    year: 1,
   })
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -29,9 +32,27 @@ const Signup = () => {
     }))
   }
 
-  const handleSubmit: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
+
+    try {
+      const validatedData = signupValidation.safeParse(formData)
+      if (!validatedData.success) {
+        return
+      }
+
+      const data = validatedData.data
+      signup.mutate(data)
+      setFormData({
+        username: 'user@1010',
+        email: '',
+        password: '',
+        course: '',
+        year: 1,
+      })
+    } catch (error) {
+      console.error('Error during signup:', error)
+    }
   }
 
   return (
@@ -44,18 +65,17 @@ const Signup = () => {
       </CardHeader>
       <CardContent>
         <div className='space-y-2'>
-          <div className='space-y-1'>
+          <div className={`space-y-1 `}>
             <Label htmlFor='username'>Username</Label>
             <Input
               id='username'
               type='text'
               name='username'
-              value={`userABCSS@`}
-              disabled={true}
-              onChange={handleInputChange}
+              value={formData.username}
+              disabled={true} // Pre-filled username (consider removing for actual signup)
             />
           </div>
-          <div className='space-y-1'>
+          <div className={`space-y-1`}>
             <Label htmlFor='email'>Email</Label>
             <Input
               id='email'
@@ -66,7 +86,7 @@ const Signup = () => {
               placeholder='Enter College e-mail address'
             />
           </div>
-          <div className='space-y-1'>
+          <div className={`space-y-1 `}>
             <Label htmlFor='password'>Password</Label>
             <Input
               id='password'
@@ -74,36 +94,35 @@ const Signup = () => {
               name='password'
               value={formData.password}
               onChange={handleInputChange}
-              placeholder='Enter Secure Password'
+              placeholder='Enter your password'
             />
           </div>
-          <div className='space-y-1'>
-            <Label htmlFor='course'>Course of Study</Label>
+          <div className={`space-y-1 `}>
+            <Label htmlFor='course'>Course</Label>
             <Input
               id='course'
               type='text'
               name='course'
               value={formData.course}
               onChange={handleInputChange}
-              placeholder='Enter Course of Study'
+              placeholder='Enter your course'
             />
           </div>
-          <div className='space-y-1'>
-            <Label htmlFor='year'>Year of Study</Label>
+          <div className={`space-y-1 `}>
+            <Label htmlFor='year'>Year</Label>
             <Input
               id='year'
               type='number'
               name='year'
               value={formData.year}
               onChange={handleInputChange}
-              min={1}
-              max={5}
-              placeholder='Enter Year of Study'
+              placeholder='Enter your year of study'
             />
           </div>
         </div>
       </CardContent>
       <CardFooter>
+        <p>{JSON.stringify(signup.data)}</p>
         <Button className='w-full' onClick={handleSubmit}>
           Register
         </Button>
