@@ -1,5 +1,5 @@
 import {
-  addPost,
+  addPostSchema,
   deletePostById,
   getPostById,
   getPostsByTopicId,
@@ -9,7 +9,7 @@ import { protectedProcedure, router } from '../trpc'
 
 export const postRouter = router({
   addPost: protectedProcedure
-    .input(addPost)
+    .input(addPostSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.userId
       const { topicId, title, description } = input

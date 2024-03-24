@@ -1,15 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function Features() {
   return (
-    <div className="grid  grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mx-5 sm:mx-0  gap-6  max-w-[600px]">
+    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mx-5 sm:mx-0  gap-6  max-w-[800px]'>
       <Card>
         <CardHeader>
           <CardTitle>Anonymous</CardTitle>
@@ -46,5 +39,5 @@ export function Features() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

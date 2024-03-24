@@ -1,3 +1,4 @@
+import Markdown from 'markdown-to-jsx'
 import React from 'react'
 
 interface ContentProps {
@@ -12,9 +13,13 @@ const Content: React.FC<ContentProps> = ({ body, isFeed }) => {
   return (
     <>
       {isFeed ? (
-        <p className='text-sx sm:text-sm md:text-base'>{truncatedContent}</p>
+        <article className='prose prose-neutral text-sx sm:text-sm md:text-base'>
+          {truncatedContent}
+        </article>
       ) : (
-        <p className='text-base'>{body}</p>
+        <article className='prose prose-neutral text-base'>
+          <Markdown>{body}</Markdown>
+        </article>
       )}
     </>
   )

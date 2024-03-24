@@ -47,7 +47,7 @@ const Profile = () => {
               likesCount={post._count.Likes}
               commentsCount={post._count.Comment}
               viewsCount={post._count.Views}
-              isFeed={false}
+              isFeed={true}
             />
           ))}
         </div>

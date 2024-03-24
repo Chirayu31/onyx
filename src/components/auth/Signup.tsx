@@ -72,7 +72,7 @@ const Signup = () => {
               type='text'
               name='username'
               value={formData.username}
-              disabled={true} // Pre-filled username (consider removing for actual signup)
+              disabled={true}
             />
           </div>
           <div className={`space-y-1`}>

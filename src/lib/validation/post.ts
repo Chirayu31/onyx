@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-export const addPost = z.object({
-  title: z.string(),
-  description: z.string(),
-  topicId: z.string(),
+export const addPostSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  topicId: z.string().min(1, 'Topic is required'),
 })
 
 export const getPostById = z.object({

@@ -1,4 +1,5 @@
 'use client'
+import { MarkdownEditor } from '@/components/add-post/MarkdownEditor'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -18,46 +19,78 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { addPostSchema } from '@/lib/validation/post'
 import { trpc } from '@/utils/trpc'
+import { useRouter } from 'next/navigation'
 import React, { MouseEventHandler, useState } from 'react'
 
 const AddPost = () => {
   const topics = trpc.topics.getAllTopicsAndSubtopics.useQuery()
   const addPost = trpc.post.addPost.useMutation()
+  const router = useRouter()
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState({
+    title: '',
+    description: '',
+    topicId: '',
+  })
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault()
+    setErrors({
+      title: '',
+      description: '',
+      topicId: '',
+    })
 
-    if (!title || !description || !selectedTopicId) {
-      console.log(title, description, selectedTopicId)
-      alert('Please fill in all required fields!')
+    const formData = {
+      title,
+      description,
+      topicId: selectedTopicId,
+    }
+
+    const result = await addPostSchema.safeParseAsync(formData)
+
+    if (!result.success) {
+      const validationErrors = result.error.formErrors.fieldErrors
+      setErrors({
+        title: validationErrors.title ? validationErrors.title[0] : '',
+        description: validationErrors.description
+          ? validationErrors.description[0]
+          : '',
+        topicId: validationErrors.topicId ? 'Topic is Required' : '',
+      })
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      const response = addPost.mutate({
-        title,
-        description,
-        topicId: selectedTopicId,
-      })
-
-      console.log('Post added successfully:', response)
+      addPost.mutate(
+        {
+          title,
+          description,
+          topicId: selectedTopicId!,
+        },
+        {
+          onSuccess: (response) => {
+            setIsSubmitting(false)
+            router.push(`/feed/${selectedTopicId}`)
+          },
+        }
+      )
     } catch (error) {
       console.error('Error adding post:', error)
-    } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <main className='flex mt-20 h-fit justify-center'>
+    <main className='flex mt-10 mb-5 h-fit justify-center'>
       <Card className='w-full max-w-[600px] mx-5 md:mx-10'>
         <CardHeader>
           <CardTitle>Add a new Post</CardTitle>
@@ -73,17 +106,20 @@ const AddPost = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            {errors.title && (
+              <span className='text-red-500'>{errors.title}</span>
+            )}
           </div>
 
           <div className='space-y-1'>
             <Label htmlFor='email'>Description</Label>
-            <Textarea
-              id='description'
-              name='description'
-              placeholder='Add Post Description'
+            <MarkdownEditor
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+            {errors.description && (
+              <span className='text-red-500'>{errors.description}</span>
+            )}
           </div>
 
           <div className='space-y-1'>
@@ -112,6 +148,9 @@ const AddPost = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
+            {errors.topicId && (
+              <span className='text-red-500'>{errors.topicId}</span>
+            )}
           </div>
         </CardContent>
         <CardFooter>

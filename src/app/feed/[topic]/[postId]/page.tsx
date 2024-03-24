@@ -69,16 +69,10 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
     return <div>Loading...</div>
   }
 
-  if (allComments) {
-    console.log(allComments)
-  }
-
   return (
     <>
-      <Nav />
-
       <main className='flex pt-4 justify-center bg-gray-100'>
-        <div className='  flex flex-col items-center top-0 w-full max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] min-h-screen  '>
+        <div className='flex flex-col items-center top-0 w-full max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] min-h-screen  '>
           {!isLoading && post && (
             <Post
               id={post.id}
