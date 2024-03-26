@@ -1,11 +1,16 @@
 'use client'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import Loader from '@/components/ui/loader'
 import { trpc } from '@/utils/trpc'
 import Link from 'next/link'
 import React from 'react'
 
 const Topics = () => {
   const topics = trpc.topics.getAllTopicsAndSubtopics.useQuery()
+
+  if (topics.isLoading) {
+    return <Loader />
+  }
 
   return (
     <main className='flex mt-10 mb-10 justify-center min-h-fit w-full'>
@@ -17,7 +22,6 @@ const Topics = () => {
         </CardHeader>
         <CardContent>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center w-full gap-4'>
-            {topics.isLoading && <p>Loading...</p>}
             {topics.data &&
               topics.data.map((topic) => (
                 <div key={topic.id} className='flex flex-col z-10'>

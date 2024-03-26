@@ -3,6 +3,7 @@ import Nav from '@/components/nav/Nav'
 import Comment from '@/components/post/Comment'
 import Post from '@/components/post/Post'
 import { Button } from '@/components/ui/button'
+import Loader from '@/components/ui/loader'
 import { Textarea } from '@/components/ui/textarea'
 import { trpc } from '@/utils/trpc'
 import React, { useEffect, useState } from 'react'
@@ -66,7 +67,7 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <Loader />
   }
 
   return (

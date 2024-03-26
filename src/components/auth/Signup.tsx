@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, MouseEventHandler, useState } from 'react'
+import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -13,16 +13,31 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { trpc } from '@/utils/trpc'
 import { signupValidation } from '@/lib/validation/auth'
+import { useRouter } from 'next/navigation'
+import { TRPCError } from '@trpc/server'
+
+interface FormData {
+  username: string
+  email: string
+  password: string
+  course: string
+  year: number
+}
 
 const Signup = () => {
   const signup = trpc.auth.signup.useMutation()
+
   const [formData, setFormData] = useState({
-    username: 'user@1010',
     email: '',
     password: '',
     course: '',
     year: 1,
   })
+
+  const [formErrors, setFormErrors] = useState<Partial<FormData>>({})
+  const [error, setError] = useState('')
+
+  const router = useRouter()
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -30,25 +45,34 @@ const Signup = () => {
       ...prevData,
       [name]: value,
     }))
+    setFormErrors({})
+    setError('')
   }
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault()
-
+    setError('')
     try {
       const validatedData = signupValidation.safeParse(formData)
+
       if (!validatedData.success) {
+        const errors = validatedData.error.issues.reduce((acc, curr) => {
+          acc[curr.path[0]] = curr.message
+          return acc
+        }, {} as { [key: string]: string })
+
+        setFormErrors(errors)
         return
       }
 
       const data = validatedData.data
-      signup.mutate(data)
-      setFormData({
-        username: 'user@1010',
-        email: '',
-        password: '',
-        course: '',
-        year: 1,
+      signup.mutate(data, {
+        onSuccess: () => {
+          router.push('/topics')
+        },
+        onError: (error) => {
+          setError(error.message)
+        },
       })
     } catch (error) {
       console.error('Error during signup:', error)
@@ -65,16 +89,7 @@ const Signup = () => {
       </CardHeader>
       <CardContent>
         <div className='space-y-2'>
-          <div className={`space-y-1 `}>
-            <Label htmlFor='username'>Username</Label>
-            <Input
-              id='username'
-              type='text'
-              name='username'
-              value={formData.username}
-              disabled={true}
-            />
-          </div>
+          {error && <p className='text-red-500'>{error}</p>}
           <div className={`space-y-1`}>
             <Label htmlFor='email'>Email</Label>
             <Input
@@ -85,6 +100,9 @@ const Signup = () => {
               onChange={handleInputChange}
               placeholder='Enter College e-mail address'
             />
+            {formErrors.email && (
+              <p className='text-red-500 text-sm mt-1'>{formErrors.email}</p>
+            )}
           </div>
           <div className={`space-y-1 `}>
             <Label htmlFor='password'>Password</Label>
@@ -96,6 +114,9 @@ const Signup = () => {
               onChange={handleInputChange}
               placeholder='Enter your password'
             />
+            {formErrors.password && (
+              <p className='text-red-500 text-sm mt-1'>{formErrors.password}</p>
+            )}
           </div>
           <div className={`space-y-1 `}>
             <Label htmlFor='course'>Course</Label>
@@ -107,6 +128,9 @@ const Signup = () => {
               onChange={handleInputChange}
               placeholder='Enter your course'
             />
+            {formErrors.course && (
+              <p className='text-red-500 text-sm mt-1'>{formErrors.course}</p>
+            )}
           </div>
           <div className={`space-y-1 `}>
             <Label htmlFor='year'>Year</Label>
@@ -118,13 +142,19 @@ const Signup = () => {
               onChange={handleInputChange}
               placeholder='Enter your year of study'
             />
+            {formErrors.year && (
+              <p className='text-red-500 text-sm mt-1'>{formErrors.year}</p>
+            )}
           </div>
         </div>
       </CardContent>
       <CardFooter>
         <p>{JSON.stringify(signup.data)}</p>
-        <Button className='w-full' onClick={handleSubmit}>
-          Register
+        <Button
+          className='w-full'
+          onClick={handleSubmit}
+          disabled={signup.isPending}>
+          {signup.isPending ? 'Registering' : 'Register'}
         </Button>
       </CardFooter>
     </Card>

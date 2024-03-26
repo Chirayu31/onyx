@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { trpc } from '@/utils/trpc'
 import React from 'react'
 import Post from '@/components/post/Post'
+import Loader from '@/components/ui/loader'
 
 const Profile = () => {
   const { data: user, isLoading: isUserLoading } = trpc.auth.profile.useQuery()
@@ -10,7 +11,7 @@ const Profile = () => {
     trpc.post.getPostsByUserId.useQuery({ page: 1, pageSize: 25 })
 
   if (isUserLoading || isPostsLoading) {
-    return <div>Loading...</div>
+    return <Loader />
   }
 
   return (

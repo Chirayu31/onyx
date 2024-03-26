@@ -1,5 +1,6 @@
 'use client'
 import Post from '@/components/post/Post'
+import Loader from '@/components/ui/loader'
 import { trpc } from '@/utils/trpc'
 import Link from 'next/link'
 import React from 'react'
@@ -12,7 +13,7 @@ const Feed = ({ params }: { params: { topic: string } }) => {
   })
 
   if (feed.isLoading) {
-    return <>Loading</>
+    return <Loader />
   }
 
   return (

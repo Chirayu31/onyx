@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET!
 
 export const authRouter = router({
   signup: procedure.input(signupValidation).mutation(async ({ ctx, input }) => {
-    const { username, email, password, course, year } = input
+    const { email, password, course, year } = input
 
     const existingUser = await ctx.prisma.user.findUnique({
       where: { email: email },
@@ -22,6 +22,38 @@ export const authRouter = router({
       })
     }
 
+    const animalResponse = await fetch(
+      'https://random-word-form.herokuapp.com/random/animal'
+    )
+    const animalData = await animalResponse.json()
+    const animal = animalData[0].toLowerCase()
+
+    const randomNumber = Math.floor(Math.random() * 1000)
+    const username = `${animal}${randomNumber}`
+
+    const category = [
+      'adventurer',
+      'adventurer-neutral',
+      'avataaars',
+      'avataaars-neutral',
+      'big-ears',
+      'big-ears-neutral',
+      'big-smile',
+      'bottts',
+      'croodles',
+      'fun-emoji',
+      'lorelei',
+      'lorelei-neutral',
+      'micah',
+      'miniavs',
+      'notionists',
+      'open-peeps',
+      'personas',
+      'pixel-art',
+    ]
+
+    const ppic = `https://api.dicebear.com/8.x/${category[0]}/svg?seed=${username}`
+
     const hashedPassword = await argon2.hash(password)
 
     const user = await ctx.prisma.user.create({
@@ -31,7 +63,7 @@ export const authRouter = router({
         password: hashedPassword,
         course,
         year,
-        ppic: '',
+        ppic: ppic,
       },
     })
 
@@ -57,13 +89,19 @@ export const authRouter = router({
     })
 
     if (!user) {
-      return { error: 'Invalid email or password' }
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Invalid email or password',
+      })
     }
 
     const validPassword = await argon2.verify(user.password, password)
 
     if (!validPassword) {
-      return { error: 'Invalid email or password' }
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Invalid email or password',
+      })
     }
 
     const token = sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' })
