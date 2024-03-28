@@ -4,6 +4,7 @@ import { sign } from 'jsonwebtoken'
 import { TRPCError } from '@trpc/server'
 import { cookies } from 'next/headers'
 import { loginValidation, signupValidation } from '@/lib/validation/auth'
+import { sendVerficationEmail } from '@/utils/sendMail'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -64,11 +65,14 @@ export const authRouter = router({
         course,
         year,
         ppic: ppic,
+        emailVerified: false,
       },
     })
 
     const token = sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' })
+
     user.password = ''
+
     cookies().set({
       name: 'auth',
       value: token,
@@ -77,6 +81,26 @@ export const authRouter = router({
       secure: process.env.NODE_ENV === 'production', // Set secure flag in production
       path: '/', // Set cookie path (adjust if needed)
     })
+
+    const verificationToken = await argon2.hash(
+      user.id + Date.now().toString(),
+      {
+        type: argon2.argon2id,
+        timeCost: 2,
+      }
+    )
+
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+    await ctx.prisma.verificationToken.create({
+      data: {
+        userId: user.id,
+        token: verificationToken,
+        expiresAt,
+      },
+    })
+
+    await sendVerficationEmail(email, verificationToken)
 
     return { user }
   }),

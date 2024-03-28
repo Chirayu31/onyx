@@ -15,24 +15,36 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid())
-  username String
-  email    String @unique
-  password String
-  course   String
-  year     Int
-  ppic     String
+  id            String  @id @default(cuid())
+  username      String
+  email         String  @unique
+  password      String
+  course        String
+  year          Int
+  ppic          String
+  emailVerified Boolean @default(false)
 
-  Posts        Post[]
-  PostLikes    PostLikes[]
-  CommentLikes CommentLikes[]
-  Comment      Comment[]
-  Views        Views[]
+  Posts             Post[]
+  PostLikes         PostLikes[]
+  CommentLikes      CommentLikes[]
+  Comment           Comment[]
+  Views             Views[]
+  VerificationToken VerificationToken?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index(fields: [email])
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, token])
 }
 
 model Topics {
