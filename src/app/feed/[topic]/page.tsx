@@ -1,5 +1,6 @@
 'use client'
 import Post from '@/components/post/Post'
+import Zero from '@/components/post/Zero'
 import Loader from '@/components/ui/loader'
 import { trpc } from '@/utils/trpc'
 import Link from 'next/link'
@@ -14,6 +15,10 @@ const Feed = ({ params }: { params: { topic: string } }) => {
 
   if (feed.isLoading) {
     return <Loader />
+  }
+
+  if (!feed.isLoading && feed.data && feed.data.length === 0) {
+    return <Zero type='feed' />
   }
 
   return (

@@ -4,6 +4,7 @@ import Content from './Content'
 import LikesButton from './LikesButton'
 import CommentButton from './CommentButton'
 import ViewsButton from './ViewsButton'
+import { formatTimeAgo } from '@/utils/helper'
 
 interface PostProps {
   id: string
@@ -38,7 +39,9 @@ const Post: React.FC<PostProps> = ({
         <div className='flex items-center gap-2'>
           <img src={userImage} className='w-10 h-10 rounded-full' alt='ppic' />
           <p className='font-semibold text-zinc-500 text-base'>{username}</p>
-          <p className='text-sm text-zinc-400'>{createdAt}</p>
+          <p className='text-sm text-zinc-400'>
+            {formatTimeAgo(new Date(createdAt))}
+          </p>
         </div>
       </CardHeader>
 

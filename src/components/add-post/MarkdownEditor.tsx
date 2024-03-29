@@ -30,7 +30,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         <Textarea
           id='description'
           name='description'
-          placeholder='Add Post Description'
+          placeholder='Add Post Description [We support markdown]'
           value={value}
           onChange={onChange}
           rows={8}

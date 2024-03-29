@@ -4,6 +4,7 @@ import { trpc } from '@/utils/trpc'
 import React from 'react'
 import Post from '@/components/post/Post'
 import Loader from '@/components/ui/loader'
+import Zero from '@/components/post/Zero'
 
 const Profile = () => {
   const { data: user, isLoading: isUserLoading } = trpc.auth.profile.useQuery()
@@ -12,6 +13,10 @@ const Profile = () => {
 
   if (isUserLoading || isPostsLoading) {
     return <Loader />
+  }
+
+  if (!isPostsLoading && posts && posts.length === 0) {
+    return <Zero type='userProfile' />
   }
 
   return (
