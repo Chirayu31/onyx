@@ -3,8 +3,13 @@ import * as argon2 from 'argon2'
 import { sign } from 'jsonwebtoken'
 import { TRPCError } from '@trpc/server'
 import { cookies } from 'next/headers'
-import { loginValidation, signupValidation } from '@/lib/validation/auth'
+import {
+  loginValidation,
+  signupValidation,
+  verificationEmail,
+} from '@/lib/validation/auth'
 import { sendVerficationEmail } from '@/utils/sendMail'
+import { randomUUID } from 'crypto'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -17,10 +22,14 @@ export const authRouter = router({
     })
 
     if (existingUser) {
-      throw new TRPCError({
-        code: 'CONFLICT',
-        message: 'Email already registered',
-      })
+      if (existingUser.emailVerified) {
+        await ctx.prisma.user.delete({ where: { id: existingUser.id } })
+      } else {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Email already registered',
+        })
+      }
     }
 
     const animalResponse = await fetch(
@@ -69,7 +78,9 @@ export const authRouter = router({
       },
     })
 
-    const token = sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' })
+    const token = sign({ userId: user.id, isVerified: false }, JWT_SECRET, {
+      expiresIn: '30d',
+    })
 
     user.password = ''
 
@@ -82,15 +93,9 @@ export const authRouter = router({
       path: '/', // Set cookie path (adjust if needed)
     })
 
-    const verificationToken = await argon2.hash(
-      user.id + Date.now().toString(),
-      {
-        type: argon2.argon2id,
-        timeCost: 2,
-      }
-    )
+    const verificationToken = randomUUID()
 
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    const expiresAt = new Date('9999-12-31T23:59:59Z')
 
     await ctx.prisma.verificationToken.create({
       data: {
@@ -109,7 +114,7 @@ export const authRouter = router({
 
     const user = await ctx.prisma.user.findUnique({
       where: { email: email },
-      select: { username: true, password: true, id: true },
+      select: { username: true, password: true, id: true, emailVerified: true },
     })
 
     if (!user) {
@@ -128,7 +133,13 @@ export const authRouter = router({
       })
     }
 
-    const token = sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' })
+    const token = sign(
+      { userId: user.id, isVerified: user.emailVerified },
+      JWT_SECRET,
+      {
+        expiresIn: '30d',
+      }
+    )
 
     cookies().set({
       name: 'auth',
@@ -160,4 +171,51 @@ export const authRouter = router({
 
     return user
   }),
+  verifyEmail: protectedProcedure
+    .input(verificationEmail)
+    .mutation(async ({ ctx, input }) => {
+      const verificationToken = await ctx.prisma.verificationToken.findUnique({
+        where: { token: input.token },
+        include: { user: true },
+      })
+
+      if (!verificationToken) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Invalid or expired verification token',
+        })
+      }
+
+      const updatedUser = await ctx.prisma.user.update({
+        where: { id: ctx.user.userId },
+        data: {
+          emailVerified: true,
+        },
+      })
+
+      await ctx.prisma.verificationToken.delete({
+        where: { token: input.token },
+      })
+
+      updatedUser.password = ''
+
+      const token = sign(
+        { userId: updatedUser.id, isVerified: true },
+        JWT_SECRET,
+        {
+          expiresIn: '30d',
+        }
+      )
+
+      cookies().set({
+        name: 'auth',
+        value: token,
+        maxAge: 24 * 60 * 60 * 30, // 30 days
+        httpOnly: true, // Prevent client-side JavaScript access
+        secure: process.env.NODE_ENV === 'production', // Set secure flag in production
+        path: '/', // Set cookie path (adjust if needed)
+      })
+
+      return { user: updatedUser }
+    }),
 })

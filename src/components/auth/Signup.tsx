@@ -43,7 +43,7 @@ const Signup = () => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: name === 'year' ? parseInt(value, 10) : value,
     }))
     setFormErrors({})
     setError('')
@@ -68,7 +68,7 @@ const Signup = () => {
       const data = validatedData.data
       signup.mutate(data, {
         onSuccess: () => {
-          router.push('/topics')
+          router.push('/verify-email')
         },
         onError: (error) => {
           setError(error.message)

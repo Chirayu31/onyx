@@ -17,3 +17,5 @@ export const loginValidation = z.object({
     .endsWith('.ies@ipsacademy.org', 'Email must be of IPS Academy'),
   password: z.string().min(1, 'Password cannot be empty'),
 })
+
+export const verificationEmail = z.object({ token: z.string() })

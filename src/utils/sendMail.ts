@@ -12,10 +12,11 @@ export const sendVerficationEmail = async (email: string, token: string) => {
   const mailOptions = {
     from: process.env.EMAIL_USERNAME,
     to: email,
-    subject: 'Please verify your email',
+    subject: 'Onyx: Please verify your email',
     html: `
-      <p>Please click the following link to verify your email address:</p>
-      <a href="${process.env.APP_URL}/verify-email?token=${token}">Verify Email</a>
+      <p>Please click the following link to verify your email address on Onyx:</p>
+      <a href="${process.env.APP_URL}/verify-email">Verify Email</a>
+      <p> Your verification token is ${token} </p>
     `,
   }
 
