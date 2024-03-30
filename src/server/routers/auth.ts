@@ -22,7 +22,7 @@ export const authRouter = router({
     })
 
     if (existingUser) {
-      if (existingUser.emailVerified) {
+      if (!existingUser.emailVerified) {
         await ctx.prisma.user.delete({ where: { id: existingUser.id } })
       } else {
         throw new TRPCError({
