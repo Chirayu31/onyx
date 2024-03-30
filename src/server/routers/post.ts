@@ -6,6 +6,7 @@ import {
   getPostsByUserId,
 } from '@/lib/validation/post'
 import { protectedProcedure, router } from '../trpc'
+import { TRPCError } from '@trpc/server'
 
 export const postRouter = router({
   addPost: protectedProcedure
@@ -29,6 +30,7 @@ export const postRouter = router({
     .input(getPostById)
     .query(async ({ ctx, input }) => {
       const { id } = input
+
       const post = await ctx.prisma.post.findUnique({
         where: { id },
         select: {
@@ -49,6 +51,13 @@ export const postRouter = router({
         },
       })
 
+      if (!post) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Post does not exists.',
+        })
+      }
+
       return post
     }),
   deletePost: protectedProcedure
@@ -67,6 +76,14 @@ export const postRouter = router({
     .query(async ({ ctx, input }) => {
       const { topicId, page = 1, pageSize = 25 } = input
       const offset = (page - 1) * pageSize
+
+      const topic = await ctx.prisma.subtopics.findUnique({
+        where: { id: topicId },
+      })
+
+      if (!topic) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Invalid Topic Id' })
+      }
 
       const posts = await ctx.prisma.post.findMany({
         where: { topicId },

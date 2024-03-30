@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
-import { Console } from 'console'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -13,7 +12,7 @@ export async function middleware(req: NextRequest) {
 
   const authCookie = req.cookies.get('auth')?.value
 
-  if (isAuthRoute || isHomeRoute || isAboutRoute) {
+  if (isAuthRoute || isAboutRoute || (isHomeRoute && !authCookie)) {
     return NextResponse.next()
   }
 
@@ -26,6 +25,10 @@ export async function middleware(req: NextRequest) {
       authCookie,
       new TextEncoder().encode(JWT_SECRET)
     )
+
+    if (isHomeRoute) {
+      return NextResponse.redirect(`${origin}/topics`)
+    }
 
     const isVerified = payload.isVerified
 

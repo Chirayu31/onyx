@@ -1,11 +1,11 @@
 'use client'
-import Nav from '@/components/nav/Nav'
 import Comment from '@/components/post/Comment'
 import Post from '@/components/post/Post'
 import { Button } from '@/components/ui/button'
 import Loader from '@/components/ui/loader'
 import { Textarea } from '@/components/ui/textarea'
 import { trpc } from '@/utils/trpc'
+import { notFound } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 export interface CommentData {
@@ -29,7 +29,12 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
   const [allComments, setAllComments] = useState<CommentData[]>([])
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
-  const { data: post, isLoading } = trpc.post.getPostById.useQuery({
+  const {
+    data: post,
+    isLoading,
+    isError,
+    error: postFetchError,
+  } = trpc.post.getPostById.useQuery({
     id: params.postId,
   })
   const { mutate: addComment } = trpc.comment.addComment.useMutation()
@@ -68,6 +73,10 @@ const PostPage = ({ params }: { params: { postId: string } }) => {
 
   if (isLoading) {
     return <Loader />
+  }
+
+  if (isError) {
+    if (postFetchError.data?.code === 'NOT_FOUND') return notFound()
   }
 
   return (

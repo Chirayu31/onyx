@@ -18,7 +18,11 @@ const Zero: React.FC<ZeroProps> = ({ type }) => {
       message = 'No data available.'
   }
 
-  return <p className='text-center mt-10 text-xl font-semibold'>{message}</p>
+  return (
+    <div className='flex items-center justify-center min-h-screen -mt-20'>
+      <p className='text-xl font-semibold'>{message}</p>
+    </div>
+  )
 }
 
 export default Zero

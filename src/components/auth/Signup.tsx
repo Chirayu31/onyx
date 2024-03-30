@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label'
 import { trpc } from '@/utils/trpc'
 import { signupValidation } from '@/lib/validation/auth'
 import { useRouter } from 'next/navigation'
-import { TRPCError } from '@trpc/server'
 
 interface FormData {
   username: string
@@ -149,7 +148,6 @@ const Signup = () => {
         </div>
       </CardContent>
       <CardFooter>
-        <p>{JSON.stringify(signup.data)}</p>
         <Button
           className='w-full'
           onClick={handleSubmit}

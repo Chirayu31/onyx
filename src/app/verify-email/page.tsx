@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 const VerificationTokenCard = () => {
   const { mutate: verifyEmail } = trpc.auth.verifyEmail.useMutation()
@@ -39,28 +40,35 @@ const VerificationTokenCard = () => {
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md p-6 mx-10'>
-      <h2 className='text-xl font-bold mb-4'>Verify Your Email</h2>
-      <form onSubmit={handleSubmit}>
-        {error && <p className='text-red-500 mb-4'>{error}</p>}
-        <div className='mb-4'>
-          <Label htmlFor='verificationToken' className='mb-2'>
-            Verification Token
-          </Label>
-          <Input
-            type='text'
-            id='verificationToken'
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder='Enter verification token'
-          />
-        </div>
-        <div className='flex justify-end'>
-          <Button type='submit' disabled={isLoading}>
-            {isLoading ? 'Verifying...' : 'Verify Email'}
-          </Button>
-        </div>
-      </form>
+    <div className='flex justify-center mt-10'>
+      <Card className='w-full max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] h-fit'>
+        <CardHeader>
+          <h2 className='font-semibold'>Verify Your Email</h2>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            {error && <p className='text-red-500 mb-4'>{error}</p>}
+            <div className='mb-4'>
+              <Label htmlFor='verificationToken' className='mb-6'>
+                Verification Token
+              </Label>
+              <Input
+                type='text'
+                id='verificationToken'
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                placeholder='Enter verification token'
+                autoComplete='off'
+              />
+            </div>
+            <div className='flex justify-end'>
+              <Button type='submit' disabled={isLoading}>
+                {isLoading ? 'Verifying...' : 'Verify Email'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }
