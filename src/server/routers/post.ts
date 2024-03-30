@@ -126,6 +126,7 @@ export const postRouter = router({
           body: true,
           userId: true,
           createdAt: true,
+          topicId: true,
           user: {
             select: {
               username: true,

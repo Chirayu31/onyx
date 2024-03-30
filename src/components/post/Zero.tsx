@@ -18,6 +18,9 @@ const Zero: React.FC<ZeroProps> = ({ type }) => {
       message = 'No data available.'
   }
 
+  if (type === 'userProfile')
+    return <p className='text-xl text-center font-semibold'>{message}</p>
+
   return (
     <div className='flex items-center justify-center min-h-screen -mt-20'>
       <p className='text-xl font-semibold'>{message}</p>

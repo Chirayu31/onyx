@@ -5,6 +5,7 @@ import React from 'react'
 import Post from '@/components/post/Post'
 import Loader from '@/components/ui/loader'
 import Zero from '@/components/post/Zero'
+import Link from 'next/link'
 
 const Profile = () => {
   const { data: user, isLoading: isUserLoading } = trpc.auth.profile.useQuery()
@@ -13,10 +14,6 @@ const Profile = () => {
 
   if (isUserLoading || isPostsLoading) {
     return <Loader />
-  }
-
-  if (!isPostsLoading && posts && posts.length === 0) {
-    return <Zero type='userProfile' />
   }
 
   return (
@@ -39,22 +36,27 @@ const Profile = () => {
       </Card>
       <div className='flex flex-col gap-5 w-full max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] h-fit items-start my-10 mx-2 sm:mx-5 md:mx-10'>
         <h2 className='text-xl font-bold mb-2'>Posts</h2>
+        {!isPostsLoading && posts && posts.length === 0 && (
+          <Zero type='userProfile' />
+        )}
         <div className='flex flex-col items-center w-full gap-1 mb-10'>
           {posts?.map((post) => (
-            <Post
-              key={post.id}
-              id={post.id}
-              title={post.title}
-              body={post.body}
-              userId={post.userId}
-              userImage={post.user.ppic}
-              username={post.user.username}
-              createdAt={post.createdAt.toLocaleString()}
-              likesCount={post._count.Likes}
-              commentsCount={post._count.Comment}
-              viewsCount={post._count.Views}
-              isFeed={true}
-            />
+            <Link href={`/feed/${post.topicId}/${post.id}`}>
+              <Post
+                key={post.id}
+                id={post.id}
+                title={post.title}
+                body={post.body}
+                userId={post.userId}
+                userImage={post.user.ppic}
+                username={post.user.username}
+                createdAt={post.createdAt.toLocaleString()}
+                likesCount={post._count.Likes}
+                commentsCount={post._count.Comment}
+                viewsCount={post._count.Views}
+                isFeed={true}
+              />
+            </Link>
           ))}
         </div>
       </div>
