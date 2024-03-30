@@ -22,14 +22,10 @@ export const authRouter = router({
     })
 
     if (existingUser) {
-      if (!existingUser.emailVerified) {
-        await ctx.prisma.user.delete({ where: { id: existingUser.id } })
-      } else {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'Email already registered',
-        })
-      }
+      throw new TRPCError({
+        code: 'CONFLICT',
+        message: 'Email already registered, Login and verify email',
+      })
     }
 
     const animalResponse = await fetch(
