@@ -40,24 +40,27 @@ const Profile = () => {
           <Zero type='userProfile' />
         )}
         <div className='flex flex-col items-center w-full gap-1 mb-10'>
-          {posts?.map((post) => (
-            <Link href={`/feed/${post.topicId}/${post.id}`}>
-              <Post
-                key={post.id}
-                id={post.id}
-                title={post.title}
-                body={post.body}
-                userId={post.userId}
-                userImage={post.user.ppic}
-                username={post.user.username}
-                createdAt={post.createdAt.toLocaleString()}
-                likesCount={post._count.Likes}
-                commentsCount={post._count.Comment}
-                viewsCount={post._count.Views}
-                isFeed={true}
-              />
-            </Link>
-          ))}
+          {posts &&
+            posts.map((post) => (
+              <>
+                <Link href={`/feed/${post.topicId}/${post.id}`}>
+                  <Post
+                    key={post.id}
+                    id={post.id}
+                    title={post.title}
+                    body={post.body}
+                    userId={post.userId}
+                    userImage={post.user.ppic}
+                    username={post.user.username}
+                    createdAt={post.createdAt.toLocaleString()}
+                    likesCount={post._count.Likes}
+                    commentsCount={post._count.Comment}
+                    viewsCount={post._count.Views}
+                    isFeed={true}
+                  />
+                </Link>
+              </>
+            ))}
         </div>
       </div>
     </div>
