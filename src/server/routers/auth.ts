@@ -18,7 +18,7 @@ export const authRouter = router({
     const { email, password, course, year } = input
 
     const existingUser = await ctx.prisma.user.findUnique({
-      where: { email: email },
+      where: { email: email.toLowerCase() },
     })
 
     if (existingUser) {
@@ -65,7 +65,7 @@ export const authRouter = router({
     const user = await ctx.prisma.user.create({
       data: {
         username,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         course,
         year,
@@ -101,7 +101,7 @@ export const authRouter = router({
       },
     })
 
-    await sendVerficationEmail(email, verificationToken)
+    await sendVerficationEmail(email.toLowerCase(), verificationToken)
 
     return { user }
   }),
@@ -109,7 +109,7 @@ export const authRouter = router({
     const { email, password } = input
 
     const user = await ctx.prisma.user.findUnique({
-      where: { email: email },
+      where: { email: email.toLowerCase() },
       select: { username: true, password: true, id: true, emailVerified: true },
     })
 
