@@ -12,6 +12,7 @@ import Content from './Content'
 import { trpc } from '@/utils/trpc'
 import { CommentData } from '@/app/feed/[topic]/[postId]/page'
 import { Textarea } from '../ui/textarea'
+import { formatTimeAgo } from '@/utils/helper'
 
 interface CommentProps {
   id: string
@@ -98,7 +99,9 @@ const Comment: React.FC<CommentProps> = ({
                 <p className='font-semibold text-zinc-500 text-base'>
                   {username}
                 </p>
-                <p className='text-sm text-zinc-400'>{createdAt}</p>
+                <p className='text-sm text-zinc-400'>
+                  {formatTimeAgo(new Date(createdAt))}
+                </p>
               </div>
             </CardHeader>
             <CardContent>
