@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 
 const VerificationTokenCard = () => {
   const { mutate: verifyEmail } = trpc.auth.verifyEmail.useMutation()
@@ -13,8 +13,7 @@ const VerificationTokenCard = () => {
   const [token, setToken] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const router = useRouter()
+  const [isVerified, setIsVerified] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -25,7 +24,7 @@ const VerificationTokenCard = () => {
         { token },
         {
           onSuccess: () => {
-            router.push('/topics')
+            setIsVerified(true)
           },
           onError: (error) => {
             setError(error.message)
@@ -68,6 +67,13 @@ const VerificationTokenCard = () => {
             </div>
           </form>
         </CardContent>
+        <CardFooter>
+          {isVerified && (
+            <a href='/topics'>
+              <p>Your email is verified, click here to continue</p>
+            </a>
+          )}
+        </CardFooter>
       </Card>
     </div>
   )
