@@ -22,10 +22,23 @@ export const authRouter = router({
     })
 
     if (existingUser) {
-      throw new TRPCError({
-        code: 'CONFLICT',
-        message: 'Email already registered, Login and verify email',
-      })
+      if (existingUser.emailVerified) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Email already registered, Please Login',
+        })
+      }
+      const verificationTokenData =
+        await ctx.prisma.verificationToken.findUnique({
+          where: { userId: existingUser.id },
+        })
+
+      if (verificationTokenData)
+        await ctx.prisma.verificationToken.delete({
+          where: { id: verificationTokenData.id },
+        })
+
+      await ctx.prisma.user.delete({ where: { id: existingUser.id } })
     }
 
     const animalResponse = await fetch(
