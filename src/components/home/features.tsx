@@ -8,10 +8,7 @@ export function Features() {
           <CardTitle>Anonymous</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>
-            Onyx offers a safe space for open discussions without real-world
-            identies
-          </p>
+          <p>Safe, anonymous discussions on Onyx. No real-world identities.</p>
         </CardContent>
       </Card>
 
@@ -21,20 +18,19 @@ export function Features() {
         </CardHeader>
         <CardContent>
           <p>
-            Join a dynamic community of college students sharing ideas and
-            connecting
+            Join vibrant student community. Share ideas, connect, grow together.
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Discussions</CardTitle>
+          <CardTitle>Engagement</CardTitle>
         </CardHeader>
         <CardContent>
           <p>
-            Onyx offers a safe space for open discussions without real-world
-            identies
+            Actively participate in diverse exchanges. Embrace pseudonymity.
+            Safe space.
           </p>
         </CardContent>
       </Card>
